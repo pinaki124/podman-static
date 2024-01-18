@@ -1,0 +1,29 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: My workflow
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    steps:
+      - name: checkout
+        uses: cloudbees.io/checkout@v1
+      - id: dockerconfig
+        name: Configure container registry credentials
+        uses: cloudbees-io/configure-oci-credentials@v0
+        with:
+          registry: ${{ vars.STAGING_DOCKER_REGISTRY }}
+          username: ${{ secrets.STAGING_DOCKER_USERNAME }}
+          password: ${{ secrets.STAGING_DOCKER_PASSWORD }}
+      - id: build-container
+        name: Build container image
+        uses: cloudbees-io/kaniko@v1
+        with:
+          dockerfile: Dockerfile
+          build-args: target=rootlesspodmanminimal
+          destination: ${{ vars.STAGING_IMAGE_REGISTRY }}/podman-static:${{ cloudbees.version }}${{ cloudbees.scm.branch == 'main' && format(',{0}/podman-static:latest', vars.STAGING_IMAGE_REGISTRY) || '' }}
+
