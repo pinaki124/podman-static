@@ -10,8 +10,8 @@ on:
 jobs:
   build:
     steps:
-      - name: checkout
-        uses: cloudbees.io/checkout@v1
+      - name: Get source code
+        uses: cloudbees-io/checkout@v1
       - id: dockerconfig
         name: Configure container registry credentials
         uses: cloudbees-io/configure-oci-credentials@v0
